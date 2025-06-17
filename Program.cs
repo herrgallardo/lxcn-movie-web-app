@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using lxcn_movie_web_app.Data;
+using lxcn_movie_web_app.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,9 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 })
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// Add custom services
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
 // Add MVC services
 builder.Services.AddControllersWithViews();

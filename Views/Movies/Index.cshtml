@@ -1,23 +1,65 @@
 @model IEnumerable<lxcn_movie_web_app.Models.Movie>
+@using lxcn_movie_web_app.Services
+@inject IUserRoleService UserRoleService
 
 @{
     ViewData["Title"] = "Movies - HollyView";
+    var isAdmin = await UserRoleService.IsAdminAsync(User);
+    var isUser = await UserRoleService.IsUserAsync(User);
+    var userRole = await UserRoleService.GetUserRoleAsync(User);
 }
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <h1 class="display-4 mb-0">Movie Collection</h1>
-        <p class="text-muted">Discover and manage your favorite movies</p>
+        <h1 class="display-4 mb-0">
+            <i class="bi bi-film"></i> Movie Collection
+        </h1>
+        <p class="text-muted">
+            Discover and manage your favorite movies
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <span class="ms-2">
+                    | Access Level: <span class="badge @(isAdmin ? "bg-danger" : "bg-success")">@userRole</span>
+                </span>
+            }
+            else
+            {
+                <span class="ms-2">| <span class="badge bg-secondary">View Only Access</span></span>
+            }
+        </p>
     </div>
     <div class="col-md-4 text-end">
-        @if (User.Identity?.IsAuthenticated == true)
+        @if (isAdmin)
         {
-            <a asp-action="Create" class="btn btn-primary btn-lg">
+            <a asp-action="Create" class="btn btn-success btn-lg">
                 <i class="bi bi-plus-circle"></i> Add New Movie
             </a>
         }
+        else if (!User.Identity?.IsAuthenticated == true)
+        {
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-lg">
+                <i class="bi bi-box-arrow-in-right"></i> Login to Add Movies
+            </a>
+        }
+        else
+        {
+            <button class="btn btn-outline-secondary btn-lg" disabled title="Only Admins can create movies">
+                <i class="bi bi-plus-circle"></i> Add New Movie (Admin Only)
+            </button>
+        }
     </div>
 </div>
+
+<!-- Permission Info Alert for Non-Authenticated Users -->
+@if (!User.Identity?.IsAuthenticated == true)
+{
+    <div class="alert alert-info" role="alert">
+        <i class="bi bi-info-circle"></i>
+        <strong>Limited Access:</strong> You're viewing as a guest.
+        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-link p-0">Login</a> to edit movies or
+        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-link p-0">Register</a> to get started.
+    </div>
+}
 
 <!-- Search and Filter Section -->
 <div class="card mb-4">
@@ -113,14 +155,22 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5 class="text-success mb-0">@movie.Price.ToString("C")</h5>
                                 <div class="btn-group" role="group">
+                                    <!-- Details button - available to everyone -->
                                     <a asp-action="Details" asp-route-id="@movie.Id" class="btn btn-outline-primary btn-sm">
                                         <i class="bi bi-eye"></i> Details
                                     </a>
-                                    @if (User.Identity?.IsAuthenticated == true)
+
+                                    <!-- Edit button - Admin and User only -->
+                                    @if (isAdmin || isUser)
                                     {
                                         <a asp-action="Edit" asp-route-id="@movie.Id" class="btn btn-outline-secondary btn-sm">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
+                                    }
+
+                                    <!-- Delete button - Admin only -->
+                                    @if (isAdmin)
+                                    {
                                         <a asp-action="Delete" asp-route-id="@movie.Id" class="btn btn-outline-danger btn-sm">
                                             <i class="bi bi-trash"></i> Delete
                                         </a>
@@ -146,14 +196,19 @@ else
                 <span>No movies match your search criteria. </span>
                 <a asp-action="Index" class="btn btn-link p-0">Clear filters</a>
             }
-            else if (User.Identity?.IsAuthenticated == true)
+            else if (isAdmin)
             {
-                <span>Start building your movie collection! </span>
-                <a asp-action="Create" class="btn btn-link p-0">Add your first movie</a>
+                <span>Start building the movie collection! </span>
+                <a asp-action="Create" class="btn btn-link p-0">Add the first movie</a>
+            }
+            else if (!User.Identity?.IsAuthenticated == true)
+            {
+                <span>Please log in to see more features. </span>
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-link p-0">Login here</a>
             }
             else
             {
-                <span>Please log in to add movies to the collection.</span>
+                <span>No movies available. Contact an admin to add movies.</span>
             }
         </p>
     </div>
