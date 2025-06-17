@@ -25,6 +25,14 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// Configure application cookies for custom access denied handling
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/Error/AccessDenied";
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+});
+
 // Add custom services
 builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
@@ -59,9 +67,12 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+// Add status code pages for 404 handling - use the new route name
+app.UseStatusCodePagesWithReExecute("/Error/PageNotFound");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

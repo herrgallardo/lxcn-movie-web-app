@@ -23,6 +23,9 @@ namespace lxcn_movie_web_app.Data
 
             // Create default admin user
             await CreateDefaultAdmin(userManager);
+
+            // Assign User role to existing users who don't have any roles
+            await AssignDefaultRolesToExistingUsers(userManager);
         }
 
         /// <summary>
@@ -65,6 +68,25 @@ namespace lxcn_movie_web_app.Data
             {
                 // Assign admin role
                 await userManager.AddToRoleAsync(adminUser, RoleConstants.Admin);
+            }
+        }
+
+        /// <summary>
+        /// Assign User role to existing users who don't have any roles
+        /// </summary>
+        /// <param name="userManager">User manager instance</param>
+        private static async Task AssignDefaultRolesToExistingUsers(UserManager<IdentityUser> userManager)
+        {
+            var allUsers = userManager.Users.ToList();
+
+            foreach (var user in allUsers)
+            {
+                var userRoles = await userManager.GetRolesAsync(user);
+                if (!userRoles.Any())
+                {
+                    // User has no roles, assign default User role
+                    await userManager.AddToRoleAsync(user, RoleConstants.User);
+                }
             }
         }
     }

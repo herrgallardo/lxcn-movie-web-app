@@ -1,0 +1,124 @@
+@{
+    ViewData["Title"] = "Access Denied";
+    var returnUrl = ViewBag.ReturnUrl as string;
+    var attemptedAction = ViewBag.AttemptedAction as string;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card border-warning shadow-lg">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-exclamation me-3" style="font-size: 2rem;"></i>
+                        <div>
+                            <h2 class="mb-0">Access Denied</h2>
+                            <p class="mb-0">You don't have permission to @attemptedAction</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <!-- User is logged in but doesn't have sufficient permissions -->
+                        <div class="alert alert-info" role="alert">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Hello @User.Identity.Name!</strong> You're logged in, but your current role doesn't allow you to @attemptedAction.
+                        </div>
+
+                        <h5>Permission Levels:</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-shield-check text-danger" style="font-size: 2rem;"></i>
+                                        <h6 class="mt-2">Admin</h6>
+                                        <small class="text-muted">Full access: Create, Edit, Delete movies and manage users</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-person-check text-success" style="font-size: 2rem;"></i>
+                                        <h6 class="mt-2">User</h6>
+                                        <small class="text-muted">Can view and edit movies (no create/delete)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="mb-3">If you need additional permissions, please contact an administrator.</p>
+                            <div class="btn-group" role="group">
+                                <a asp-controller="Movies" asp-action="Index" class="btn btn-primary">
+                                    <i class="bi bi-film"></i> View Movies
+                                </a>
+                                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">
+                                    <i class="bi bi-house"></i> Go Home
+                                </a>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- User is not logged in -->
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Not Logged In:</strong> You need to log in to @attemptedAction.
+                        </div>
+
+                        <div class="row text-center">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <i class="bi bi-box-arrow-in-right text-primary" style="font-size: 2rem;"></i>
+                                        <h6 class="mt-2">Already Have an Account?</h6>
+                                        <p class="text-muted small">Log in to access more features</p>
+                                        <a asp-area="Identity" asp-page="/Account/Login" 
+                                           asp-route-returnUrl="@returnUrl" 
+                                           class="btn btn-primary">
+                                            <i class="bi bi-box-arrow-in-right"></i> Login
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <i class="bi bi-person-plus text-success" style="font-size: 2rem;"></i>
+                                        <h6 class="mt-2">New to HollyView?</h6>
+                                        <p class="text-muted small">Create a free account to get started</p>
+                                        <a asp-area="Identity" asp-page="/Account/Register" 
+                                           asp-route-returnUrl="@returnUrl" 
+                                           class="btn btn-success">
+                                            <i class="bi bi-person-plus"></i> Register
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <p class="text-muted">Or continue browsing as a guest:</p>
+                            <a asp-controller="Movies" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-film"></i> Browse Movies
+                            </a>
+                        </div>
+                    }
+                </div>
+                
+                @if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    <div class="card-footer text-muted">
+                        <small>
+                            <i class="bi bi-arrow-left"></i> 
+                            You were trying to access: <code>@returnUrl</code>
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
