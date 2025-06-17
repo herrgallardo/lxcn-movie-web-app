@@ -1,8 +1,167 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home - HollyView";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<div class="hero-section bg-dark text-white position-relative overflow-hidden mb-5"
+    style="min-height: 60vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container h-100 d-flex align-items-center">
+        <div class="row w-100">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-2 fw-bold mb-4">HollyView</h1>
+                <p class="lead fs-4 mb-4">The Action has just begun</p>
+                <p class="fs-5 mb-5">Discover, manage, and enjoy your favorite movie collection</p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a asp-controller="Movies" asp-action="Index" class="btn btn-light btn-lg px-4 py-2">
+                        <i class="bi bi-film"></i> Explore Movies
+                    </a>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Movies" asp-action="Create" class="btn btn-outline-light btn-lg px-4 py-2">
+                            <i class="bi bi-plus-circle"></i> Add Movie
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-light btn-lg px-4 py-2">
+                            <i class="bi bi-person-plus"></i> Join Now
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decorative Elements -->
+    <div class="position-absolute" style="top: 10%; right: 10%; opacity: 0.1; font-size: 8rem;">
+        <i class="bi bi-film"></i>
+    </div>
+    <div class="position-absolute" style="bottom: 10%; left: 10%; opacity: 0.1; font-size: 6rem;">
+        <i class="bi bi-camera-reels"></i>
+    </div>
 </div>
+
+<!-- Features Section -->
+<div class="container mb-5">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2 class="display-5 fw-bold mb-3">Why Choose HollyView?</h2>
+            <p class="lead text-muted">Your ultimate movie management experience</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 4rem; height: 4rem;">
+                        <i class="bi bi-search fs-2"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Advanced Search</h4>
+                    <p class="text-muted">Find movies instantly with our powerful search and filtering system. Search by
+                        title, genre, release date, and more.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 4rem; height: 4rem;">
+                        <i class="bi bi-collection fs-2"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Personal Collection</h4>
+                    <p class="text-muted">Build and manage your personal movie collection. Add detailed information,
+                        ratings, and descriptions for each movie.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 4rem; height: 4rem;">
+                        <i class="bi bi-shield-check fs-2"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Secure & Private</h4>
+                    <p class="text-muted">Your data is protected with industry-standard security. User authentication
+                        ensures your collection stays private.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Movie Preview Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2 class="display-5 fw-bold mb-3">Featured Movies</h2>
+                <p class="lead text-muted mb-4">Check out some of the amazing movies in our collection</p>
+                <a asp-controller="Movies" asp-action="Index" class="btn btn-primary btn-lg">
+                    <i class="bi bi-arrow-right"></i> View All Movies
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+@if (User.Identity?.IsAuthenticated != true)
+{
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5">
+                        <h3 class="display-6 fw-bold mb-3">Ready to Start Your Movie Journey?</h3>
+                        <p class="lead text-muted mb-4">Join HollyView today and start building your ultimate movie
+                            collection. It's free and takes less than a minute!</p>
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary btn-lg px-4">
+                                <i class="bi bi-person-plus"></i> Sign Up Free
+                            </a>
+                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary btn-lg px-4">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animate feature cards on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function (entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all feature cards
+            document.querySelectorAll('.card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+}
