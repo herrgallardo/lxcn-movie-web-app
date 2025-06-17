@@ -1,0 +1,142 @@
+@model IEnumerable<lxcn_movie_web_app.Models.ViewModels.UserViewModel>
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="display-4">
+            <i class="bi bi-people"></i> User Management
+        </h1>
+        <p class="text-muted">Manage user accounts and role assignments</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">All Users (@Model.Count())</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Email</th>
+                            <th>User ID</th>
+                            <th>Email Confirmed</th>
+                            <th>Roles</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var userModel in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@userModel.User.Email</strong>
+                                    @if (userModel.User.UserName == User.Identity?.Name)
+                                    {
+                                        <span class="badge bg-info ms-2">You</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="text-muted">@userModel.User.Id.Substring(0, 8)...</small>
+                                </td>
+                                <td>
+                                    @if (userModel.User.EmailConfirmed)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> Confirmed
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-exclamation-circle"></i> Pending
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (userModel.Roles.Any())
+                                    {
+                                        @foreach (var role in userModel.Roles)
+                                        {
+                                            var badgeClass = role == "Admin" ? "bg-danger" : "bg-success";
+                                            <span class="badge @badgeClass me-1">@role</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">No Roles</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="EditUser" asp-route-id="@userModel.User.Id"
+                                            class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-pencil"></i> Edit Roles
+                                        </a>
+                                        @if (userModel.User.UserName != User.Identity?.Name)
+                                        {
+                                            <form asp-action="DeleteUser" method="post" style="display: inline;">
+                                                <input type="hidden" name="userId" value="@userModel.User.Id" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                    onclick="return confirm('Are you sure you want to delete user @userModel.User.Email?')">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="bi bi-people" style="font-size: 3rem; color: #6c757d;"></i>
+                <h4 class="mt-3">No Users Found</h4>
+                <p class="text-muted">There are no users in the system.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Role Legend -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Role Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <span class="badge bg-danger me-2">Admin</span>
+                        <small>Full system access (Create, Read, Update, Delete)</small>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="badge bg-success me-2">User</span>
+                        <small>Limited access (Read, Update only)</small>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="badge bg-secondary me-2">No Role</span>
+                        <small>View-only access (assigned User role automatically)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
