@@ -8,9 +8,8 @@ using System.Security.Claims;
 namespace lxcn_movie_web_app.Controllers
 {
     /// <summary>
-    /// Controller for handling movie CRUD operations
-    /// Provides functionality to create, read, update, and delete movies
-    /// Implements authorization to control access based on user roles
+    /// Controller for handling movie CRUD operations with role-based authorization
+    /// Implements three-tier access: Admin (full), User (read/update), Non-user (view only)
     /// </summary>
     public class MoviesController : Controller
     {
@@ -25,12 +24,8 @@ namespace lxcn_movie_web_app.Controllers
 
         /// <summary>
         /// Display list of all movies with search and filter functionality
-        /// GET: Movies
+        /// GET: Movies - Available to everyone (including non-users)
         /// </summary>
-        /// <param name="searchString">Search term for movie titles</param>
-        /// <param name="movieGenre">Filter by specific genre</param>
-        /// <param name="sortOrder">Sort order for the results</param>
-        /// <returns>View with list of movies</returns>
         public async Task<IActionResult> Index(string searchString, string movieGenre, string sortOrder)
         {
             // Create query for movies
@@ -96,10 +91,8 @@ namespace lxcn_movie_web_app.Controllers
 
         /// <summary>
         /// Display details of a specific movie
-        /// GET: Movies/Details/5
+        /// GET: Movies/Details/5 - Available to everyone (including non-users)
         /// </summary>
-        /// <param name="id">Movie ID</param>
-        /// <returns>Details view for the movie</returns>
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -120,11 +113,9 @@ namespace lxcn_movie_web_app.Controllers
 
         /// <summary>
         /// Display form to create a new movie
-        /// GET: Movies/Create
-        /// Requires user authentication
+        /// GET: Movies/Create - ADMIN ONLY
         /// </summary>
-        /// <returns>Create view with empty movie form</returns>
-        [Authorize]
+        [Authorize(Roles = RoleConstants.Admin)]
         public IActionResult Create()
         {
             return View();
@@ -132,14 +123,11 @@ namespace lxcn_movie_web_app.Controllers
 
         /// <summary>
         /// Process the creation of a new movie
-        /// POST: Movies/Create
-        /// Requires user authentication
+        /// POST: Movies/Create - ADMIN ONLY
         /// </summary>
-        /// <param name="movie">Movie data from the form</param>
-        /// <returns>Redirect to Index on success, or return to Create view with validation errors</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> Create([Bind("Title,ReleaseDate,Genre,Price,Description,ImageUrl,Rating,Duration")] Movie movie)
         {
             if (ModelState.IsValid)
@@ -160,12 +148,9 @@ namespace lxcn_movie_web_app.Controllers
 
         /// <summary>
         /// Display form to edit an existing movie
-        /// GET: Movies/Edit/5
-        /// Requires user authentication
+        /// GET: Movies/Edit/5 - ADMIN AND USER
         /// </summary>
-        /// <param name="id">Movie ID to edit</param>
-        /// <returns>Edit view with populated movie form</returns>
-        [Authorize]
+        [Authorize(Roles = RoleConstants.AdminAndUser)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -179,21 +164,16 @@ namespace lxcn_movie_web_app.Controllers
                 return NotFound();
             }
 
-            // Check if user can edit this movie (for future role-based authorization)
             return View(movie);
         }
 
         /// <summary>
         /// Process the update of an existing movie
-        /// POST: Movies/Edit/5
-        /// Requires user authentication
+        /// POST: Movies/Edit/5 - ADMIN AND USER
         /// </summary>
-        /// <param name="id">Movie ID being edited</param>
-        /// <param name="movie">Updated movie data from the form</param>
-        /// <returns>Redirect to Index on success, or return to Edit view with validation errors</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
+        [Authorize(Roles = RoleConstants.AdminAndUser)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price,Description,ImageUrl,Rating,Duration,DateCreated,CreatedBy")] Movie movie)
         {
             if (id != movie.Id)
@@ -228,12 +208,9 @@ namespace lxcn_movie_web_app.Controllers
 
         /// <summary>
         /// Display confirmation page for deleting a movie
-        /// GET: Movies/Delete/5
-        /// Requires user authentication
+        /// GET: Movies/Delete/5 - ADMIN ONLY
         /// </summary>
-        /// <param name="id">Movie ID to delete</param>
-        /// <returns>Delete confirmation view</returns>
-        [Authorize]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -254,14 +231,11 @@ namespace lxcn_movie_web_app.Controllers
 
         /// <summary>
         /// Process the deletion of a movie
-        /// POST: Movies/Delete/5
-        /// Requires user authentication
+        /// POST: Movies/Delete/5 - ADMIN ONLY
         /// </summary>
-        /// <param name="id">Movie ID to delete</param>
-        /// <returns>Redirect to Index after successful deletion</returns>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var movie = await _context.Movies.FindAsync(id);
@@ -278,8 +252,6 @@ namespace lxcn_movie_web_app.Controllers
         /// <summary>
         /// Check if a movie exists in the database
         /// </summary>
-        /// <param name="id">Movie ID to check</param>
-        /// <returns>True if movie exists, false otherwise</returns>
         private bool MovieExists(int id)
         {
             return _context.Movies.Any(e => e.Id == id);
@@ -287,10 +259,8 @@ namespace lxcn_movie_web_app.Controllers
 
         /// <summary>
         /// AJAX endpoint for searching movies
-        /// GET: Movies/Search
+        /// GET: Movies/Search - Available to everyone
         /// </summary>
-        /// <param name="term">Search term</param>
-        /// <returns>JSON array of matching movie titles</returns>
         [HttpGet]
         public async Task<IActionResult> Search(string term)
         {
@@ -306,6 +276,36 @@ namespace lxcn_movie_web_app.Controllers
                 .ToListAsync();
 
             return Json(movies);
+        }
+
+        /// <summary>
+        /// Development helper to reset sample data - REMOVE IN PRODUCTION
+        /// GET: Movies/ResetData
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ResetData()
+        {
+            // Only allow in development environment
+            var environment = HttpContext.RequestServices.GetService<IWebHostEnvironment>();
+            if (environment?.IsDevelopment() != true)
+            {
+                return NotFound();
+            }
+
+            // Clear existing movies
+            var existingMovies = await _context.Movies.ToListAsync();
+            _context.Movies.RemoveRange(existingMovies);
+            await _context.SaveChangesAsync();
+
+            // Reseed with new data
+            using (var scope = HttpContext.RequestServices.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                Data.SeedData.Initialize(services);
+            }
+
+            TempData["SuccessMessage"] = "Movie data has been reset with new TMDB posters!";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

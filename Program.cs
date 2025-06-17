@@ -29,12 +29,16 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Seed the database with sample data
+// Initialize roles and admin user
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        // Initialize roles first
+        await RoleSeeder.SeedRolesAndAdmin(services);
+
+        // Then seed movie data
         SeedData.Initialize(services);
     }
     catch (Exception ex)
